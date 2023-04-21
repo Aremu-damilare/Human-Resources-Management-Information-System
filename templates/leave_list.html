@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  
+  
+ 
+<div class="content">
+    <div class="container-fluid">
+        {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+        <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addleaveModal">Add Leave</button>
+
+        <!-- Add leave Modal -->
+        <div class="modal fade" id="addleaveModal" tabindex="-1" aria-labelledby="addleaveModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addleaveModalLabel">Add leave</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    {% if form.errors %}
+                <div class="alert alert-danger">
+                  <ul>
+                    {% for field_errors in form.errors.values %}
+                      {% for error in field_errors %}
+                        <li>{{ error }}</li>
+                      {% endfor %}
+                    {% endfor %}
+                  </ul>
+                </div>
+              {% endif %}
+                {{ form.as_p }}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+                </form>
+            </div>
+            </div>
+        </div>
+        </div>
+
+       <div class="row">
+          <div class="col-md-12">
+             <div class="card">
+                <div class="card-header card-header-primary">
+                   <h4 class="card-title ">Leave data</h4>
+                   <!-- <p class="card-category"> Here is a subtitle for this table</p> -->
+                </div>
+                <div class="card-body">
+                   <div class="table-responsive">
+                    <input type="text" id="search-input" placeholder="search data...">
+                    <table class="table">
+                        <thead>
+                          <tr>
+                            <th>Staff</th>
+                            <th>Leave type</th>
+                            <th>Start date</th>
+                            <th>End date</th>
+                            <th>Approval status</th>
+                            <th>action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {% for leave in leaves %}
+                            <tr>
+                              <td>{{ leave.employee }}</td>
+                              <td>{{ leave.leave_type }}</td>
+                              <td>{{ leave.start_date }}</td>
+                              <td>{{ leave.end_date }}</td>
+                              <td>{{ leave.approval_status }}</td>
+                              <td>
+                                <form action="{% url 'delete_leave' leave.id %}" method="post">
+                                  {% csrf_token %}
+                                  <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal{{ leave.id }}">Delete</button>
+                                  <div class="modal fade" id="confirmDeleteModal{{ leave.id }}" tabindex="-1" aria-labelledby="confirmDeleteModal{{ leave.id }}Label" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                      <div class="modal-content">
+                                        <div class="modal-header">
+                                          <h5 class="modal-title" id="confirmDeleteModal{{ leave.id }}Label">Confirm Delete</h5>
+                                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                          Are you sure you want to delete "{{ leave.employee }}, status: {{ leave.approval_status }}"?
+                                        </div>
+                                        <div class="modal-footer">
+                                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                          <button type="submit" class="btn btn-danger">Delete</button>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </form>
+                              </td>
+                            </tr>
+                          {% endfor %}
+                        </tbody>
+                    </table>
+                   </div>
+                </div>
+             </div>
+          </div>
+          
+       </div>
+    </div>
+ </div>
+ <script>
+  const searchInput = document.getElementById('search-input');
+  const tableRows = document.querySelectorAll('tbody tr');
+
+  searchInput.addEventListener('input', () => {
+      const searchQuery = searchInput.value.toLowerCase();
+      tableRows.forEach(row => {
+          const columns = row.querySelectorAll('td');
+          let foundMatch = false;
+          columns.forEach(column => {
+              if (column.textContent.toLowerCase().includes(searchQuery)) {
+                  foundMatch = true;
+              }
+          });
+          if (foundMatch) {
+              row.style.display = 'table-row';
+          } else {
+              row.style.display = 'none';
+          }
+      });
+  });
+</script>
+{% endblock %}

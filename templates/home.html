@@ -1,0 +1,253 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+      <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NKDMSK6" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+      
+            <div class="content">
+               <div class="container-fluid">
+                 
+                  <div class="row">
+                     <div class="col-md">
+                        <div class="card card-chart">
+                           <div class="card-header card-header-success">
+                              <div class="ct-chart" id="">
+                                
+                                <!--  -->
+                                <canvas id="performanceChart"></canvas>
+                              </div>
+                           </div>
+                           <div class="card-body">
+                              <h4 class="card-title">Staff Performance Stat</h4>
+                              <p class="card-category">
+                                 <!-- <span class="text-success"><i class="fa fa-long-arrow-up"></i> 55% </span> increase in today . -->
+                              </p>
+                           </div>
+                           <div class="card-footer">
+                              <div class="stats">
+                                 <i class="material-icons">access_time</i> updated at {{performances_last_created.created_at}}
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     
+                     
+                  </div>
+                  <div class="row">
+                     <div class="col-lg-6 col-md-12">
+                        <div class="card">
+                           <div class="card-header card-header-tabs card-header-primary">
+                              <div class="nav-tabs-navigation">
+                                 <div class="nav-tabs-wrapper">
+                                    <span class="nav-tabs-title">Staffs by department </span>
+                                    <ul class="nav nav-tabs" data-tabs="tabs">
+                                       <li class="nav-item">
+                                          <a class="nav-link active" href="#profile" data-toggle="tab">
+                                             <span id="total-staff"></span>
+                                             <div class="ripple-container"></div>
+                                          </a>
+                                       </li>
+                                       <!-- <li class="nav-item">
+                                          <a class="nav-link" href="#messages" data-toggle="tab">
+                                             <i class="material-icons">code</i> Website
+                                             <div class="ripple-container"></div>
+                                          </a>
+                                       </li>
+                                       <li class="nav-item">
+                                          <a class="nav-link" href="#settings" data-toggle="tab">
+                                             <i class="material-icons">cloud</i> Server
+                                             <div class="ripple-container"></div>
+                                          </a>
+                                       </li> -->
+                                    </ul>
+                                 </div>
+                              </div>
+                           </div>
+                           <div class="card-body">
+                              <div class="tab-content">
+                                <canvas id="employeeDepartmentChart"></canvas>
+                             
+
+                                
+                                 
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="col-lg-6 col-md-12">
+                        <div class="card">
+                           <div class="card-header card-header-warning">
+                              <h4 class="card-title">Employees Stats</h4>
+                              <p class="card-category">Latest employee <b><span id="last-employee"></span></b></p>
+                           </div>
+                           <div class="card-body table-responsive">
+                            <table id="employee-table" class="table table-hover">
+                                <thead class="text-warning">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Salary</th>
+                                        <th>Country</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Table rows will be populated dynamically using JavaScript -->
+                                </tbody>
+                            </table>
+                            <!-- Example pagination links -->
+                            <ul id="pagination" class="pagination">
+                                <li class="page-item" id="first-page">
+                                    <a class="page-link" href="#">1</a>
+                                </li>
+                                <li class="page-item" id="prev-page">
+                                    <a class="page-link" href="#">Previous</a>
+                                </li>
+                                <li class="page-item" id="next-page">
+                                    <a class="page-link" href="#">Next</a>
+                                </li>
+                                <li class="page-item" id="last-page">
+                                    <a class="page-link" href="#"></a>
+                                </li>
+                            </ul>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+
+
+
+      <script>
+        var datetime = {
+            date: function(year, month, day) {
+                return new Date(year, month - 1, day);
+            }
+        };
+        
+        
+            // Retrieve data from template context
+            var performanceDates = {{ performance_dates|safe }};
+            var performanceScores = {{ performance_scores|safe }};
+            var employee = {{ performance_user|safe }};
+
+            var formattedDates = [];
+            var dateStrings = performanceDates
+            // Loop through each date string and convert to Date object
+            for (var i = 0; i < dateStrings.length; i++) {
+            var date = new Date(dateStrings[i]);
+            
+            // Extract individual date components
+            var year = date.getFullYear();
+            var month = date.getMonth() + 1;
+            var day = date.getDate();
+            
+            // Format date as 'YYYY-MM-DD' and push to formattedDates array
+            var formattedDate = year + '-' + (month < 10 ? '0' : '') + month + '-' + (day < 10 ? '0' : '') + day;
+            formattedDates.push(formattedDate);
+            }
+
+            {% comment %} <!-- console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", performanceDates ) --> {% endcomment %}
+            // Create line chart
+            var ctx = document.getElementById('performanceChart').getContext('2d');
+            var performanceChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: employee,
+                    datasets: [{
+                        label: 'Performance Score',
+                        data: performanceScores,
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',  // Set background color for the chart
+                        borderColor: 'rgba(75, 192, 192, 1)',  // Set border color for the chart
+                        borderWidth: 1  // Set border width for the chart
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 5  // Set max value for y-axis
+                        }
+                    }
+                }
+            });
+        
+       </script>
+       
+       <script>
+        // Fetch data from the server
+        fetch('/employee_department_chart/')
+        .then(response => response.json())
+        .then(data => {
+            // Create a bar chart using Chart.js
+            var ctx = document.getElementById('employeeDepartmentChart').getContext('2d');
+            var total_staff = document.getElementById('total-staff').innerHTML = data.total
+
+            var chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.labels, // Departments as x-axis labels
+                    datasets: [{
+                        label: 'Number of staff', // Label for the data
+                        data: data.data, // Number of employees in each department
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)', // Background color of bars
+                        borderColor: 'rgba(75, 192, 192, 1)', // Border color of bars
+                        borderWidth: 1 // Width of bar borders
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            stepSize: 2 // Set the step size for y-axis to 1
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+    <script>
+        // Function to update the table with employee data
+        function updateTable(data) {
+            // Clear the existing table rows
+            $('#employee-table tbody').empty();
+    
+            // Loop through the employees data and populate the table rows
+            $.each(data.employees, function(index, employee) {
+                var row = '<tr>' +
+                    '<td>' + employee.id + '</td>' +
+                    '<td>' + employee.name + '</td>' +
+                    '<td>' + employee.salary + '</td>' +
+                    '<td>' + employee.country + '</td>' +
+                    '</tr>';
+                $('#employee-table tbody').append(row);
+            });
+            var lastEmployee = document.querySelector("#last-employee").innerHTML = data.last_employee_name + "   " +data.last_employee;
+            // Update pagination links
+            $('#first-page a').attr('href', '?page=1');
+            $('#prev-page a').attr('href', '?page=' + data.current_page);
+            $('#next-page a').attr('href', '?page=' + data.current_page);
+            $('#last-page a').attr('href', '?page=' + data.total_pages);
+            $('#last-page a').text(data.total_pages);
+        }
+    
+        // Function to make AJAX request to employee_data endpoint
+        function fetchEmployeesData(url) {
+            $.getJSON(url, function(data) {
+                updateTable(data);
+            });
+        }
+    
+        // Fetch employees data when the page loads
+        $(document).ready(function() {
+            fetchEmployeesData('/employee_data/');
+        });
+    
+        // Attach click event handlers to pagination links
+        $('#first-page, #prev-page, #next-page, #last-page').on('click', 'a', function(event) {
+            event.preventDefault();
+            var url = $(this).attr('href');
+            fetchEmployeesData(url);
+        });
+    </script>
+   
+    {% endblock %}

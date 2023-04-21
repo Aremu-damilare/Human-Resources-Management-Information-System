@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  
+  
+ 
+<div class="content">
+    <div class="container-fluid">
+        {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+        <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addperformanceModal">Add performance</button>
+
+        <!-- Add performance Modal -->
+        <div class="modal fade" id="addperformanceModal" tabindex="-1" aria-labelledby="addperformanceModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addperformanceModalLabel">Add performance</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    {% if form.errors %}
+                <div class="alert alert-danger">
+                  <ul>
+                    {% for field_errors in form.errors.values %}
+                      {% for error in field_errors %}
+                        <li>{{ error }}</li>
+                      {% endfor %}
+                    {% endfor %}
+                  </ul>
+                </div>
+              {% endif %}
+                {{ form.as_p }}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+                </form>
+            </div>
+            </div>
+        </div>
+        </div>
+
+       <div class="row">
+          <div class="col-md-12">
+             <div class="card">
+                <div class="card-header card-header-primary">
+                   <h4 class="card-title ">Performance data</h4>
+                   <p class="card-category">performance data for staff</p>
+                </div>
+                <div class="card-body">
+                   <div class="table-responsive">
+                    <input type="text" id="search-input" placeholder="search data...">
+                    <table class="table">
+                        <thead>
+                          <tr>   
+                            <th>Employee</th>
+                            <th>Type</th>
+                            <th>Date</th>
+                            <th>Score</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {% for performance in performances %}
+                            <tr>
+                              <td>{{ performance.employee }}</td>
+                              <td>{{ performance.performance_type }}</td>
+                              <td>{{ performance.performance_date }}</td>
+                              <td>{{ performance.performance_score }}</td>
+                              <td>
+                                <form action="{% url 'delete_performance' performance.id %}" method="post">
+                                  {% csrf_token %}
+                                  <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal{{ performance.id }}">Delete</button>
+                                  <div class="modal fade" id="confirmDeleteModal{{ performance.id }}" tabindex="-1" aria-labelledby="confirmDeleteModal{{ performance.id }}Label" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                      <div class="modal-content">
+                                        <div class="modal-header">
+                                          <h5 class="modal-title" id="confirmDeleteModal{{ performance.id }}Label">Confirm Delete</h5>
+                                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                          Are you sure you want to delete "{{ performance.employee }}, score: {{ performance.performance_score }}"?
+                                        </div>
+                                        <div class="modal-footer">
+                                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                          <button type="submit" class="btn btn-danger">Delete</button>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </form>
+                              </td>
+                            </tr>
+                          {% endfor %}
+                        </tbody>
+                    </table>
+                   </div>
+                </div>
+             </div>
+          </div>
+          
+       </div>
+    </div>
+ </div>
+ <script>
+  const searchInput = document.getElementById('search-input');
+  const tableRows = document.querySelectorAll('tbody tr');
+
+  searchInput.addEventListener('input', () => {
+      const searchQuery = searchInput.value.toLowerCase();
+      tableRows.forEach(row => {
+          const columns = row.querySelectorAll('td');
+          let foundMatch = false;
+          columns.forEach(column => {
+              if (column.textContent.toLowerCase().includes(searchQuery)) {
+                  foundMatch = true;
+              }
+          });
+          if (foundMatch) {
+              row.style.display = 'table-row';
+          } else {
+              row.style.display = 'none';
+          }
+      });
+  });
+</script>
+{% endblock %}

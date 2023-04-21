@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  
+  
+ 
+<div class="content">
+    <div class="container-fluid">
+        {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+        <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addmanagerModal">Add Manager</button>
+
+        <!-- Add manager Modal -->
+        <div class="modal fade" id="addmanagerModal" tabindex="-1" aria-labelledby="addmanagerModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addmanagerModalLabel">Add manager</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    {% if form.errors %}
+                <div class="alert alert-danger">
+                  <ul>
+                    {% for field_errors in form.errors.values %}
+                      {% for error in field_errors %}
+                        <li>{{ error }}</li>
+                      {% endfor %}
+                    {% endfor %}
+                  </ul>
+                </div>
+              {% endif %}
+                {{ form.as_p }}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+                </form>
+            </div>
+            </div>
+        </div>
+        </div>
+
+       <div class="row">
+          <div class="col-md-12">
+             <div class="card">
+                <div class="card-header card-header-primary">
+                   <h4 class="card-title ">Managers data</h4>
+                   <p class="card-category">Total managers: {{managers_count}}</p>
+                </div>
+                <div class="card-body">
+                   <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                          <tr>
+                            <th>ID</th>
+                            <th>First name</th>
+                            <th>Last name</th>
+                            <th>Email</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {% for manager in managers %}
+                            <tr>
+                              <td>{{ manager.id }}</td>
+                              <td>{{ manager.first_name }}</td>
+                              <td>{{ manager.last_name }}</td>
+                              <td>{{ manager.email }}</td>
+                              <td>
+                                <form action="{% url 'delete_manager' manager.id %}" method="post">
+                                  {% csrf_token %}
+                                  <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal{{ manager.id }}">Delete</button>
+                                  <div class="modal fade" id="confirmDeleteModal{{ manager.id }}" tabindex="-1" aria-labelledby="confirmDeleteModal{{ manager.id }}Label" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                      <div class="modal-content">
+                                        <div class="modal-header">
+                                          <h5 class="modal-title" id="confirmDeleteModal{{ manager.id }}Label">Confirm Delete</h5>
+                                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                          Are you sure you want to delete "{{ manager.first_name }} {{ manager.last_name }}"?
+                                        </div>
+                                        <div class="modal-footer">
+                                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                          <button type="submit" class="btn btn-danger">Delete</button>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </form>
+                              </td>
+                            </tr>
+                          {% endfor %}
+                        </tbody>
+                    </table>
+                   </div>
+                </div>
+             </div>
+          </div>
+          
+       </div>
+    </div>
+ </div>
+{% endblock %}
